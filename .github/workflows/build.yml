@@ -1,51 +1,32 @@
 name: Build PVSmartLauncher
 
 on:
-
   push:
-
     branches:
       - main
-
-workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
-
   build:
-
     runs-on: windows-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
-    - name: Setup .NET
+      - name: Restore
+        run: dotnet restore Launcher/Launcher.csproj
 
-      uses: actions/setup-dotnet@v4
+      - name: Publish
+        run: dotnet publish Launcher/Launcher.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
 
-      with:
-
-        dotnet-version: 8.0.x
-
-    - name: Restore
-
-      run: dotnet restore Launcher/Launcher.csproj
-
-    - name: Publish
-
-      run: |
-        dotnet publish Launcher/Launcher.csproj ^
-        -c Release ^
-        -r win-x64 ^
-        --self-contained true ^
-        /p:PublishSingleFile=true
-
-    - name: Upload EXE
-
-      uses: actions/upload-artifact@v4
-
-      with:
-
-        name: PVSmartLauncher
-
-        path: Launcher/bin/Release/net8.0-windows/win-x64/publish/*
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: PVSmartLauncher
+          path: Launcher/bin/Release/net8.0-windows/win-x64/publish/
